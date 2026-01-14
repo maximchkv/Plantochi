@@ -231,5 +231,5 @@ struct NoteInputView: View {
 #Preview {
     let plant = PlantInstance(name: "Монстера", plantType: .monstera)
     return ActionSheetView(plant: plant)
-        .modelContainer(for: [PlantInstance.self, ActionLog.self, HomeEntity.self], inMemory: true)
+        .modelContainer(for: [PlantInstance.self, ActionLog.self, HomeEntity.self, KnowledgeNode.self, Quest.self], inMemory: true)
 }

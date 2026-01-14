@@ -168,11 +168,35 @@ struct AddPlantView: View {
         
         modelContext.insert(plant)
         
+        // Проверить, это первое растение?
+        let descriptor = FetchDescriptor<PlantInstance>()
+        do {
+            let allPlants = try modelContext.fetch(descriptor)
+            if allPlants.count == 1 {
+                // Это первое растение - запустить первый квест
+                startFirstQuest(modelContext: modelContext)
+            }
+        } catch {
+            print("Failed to check plants count: \(error)")
+        }
+        
         do {
             try modelContext.save()
             dismiss()
         } catch {
             print("Failed to save plant: \(error)")
+        }
+    }
+    
+    private func startFirstQuest(modelContext: ModelContext) {
+        let questDescriptor = FetchDescriptor<Quest>()
+        do {
+            let allQuests = try modelContext.fetch(questDescriptor)
+            if let firstQuest = allQuests.first(where: { $0.state == .upcoming }) {
+                firstQuest.state = .active
+            }
+        } catch {
+            print("Failed to start first quest: \(error)")
         }
     }
 }

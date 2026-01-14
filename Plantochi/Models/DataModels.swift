@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 // MARK: - Plant Type Enum
 enum PlantType: String, Codable, CaseIterable {
@@ -209,5 +210,150 @@ final class HomeEntity {
         }
         
         return totalHealth / Double(plants.count)
+    }
+}
+
+// MARK: - Knowledge Node Type
+enum KnowledgeNodeType: String, Codable {
+    case indicator = "Индикатор"
+    case action = "Действие"
+    case consequence = "Последствие"
+    
+    var icon: String {
+        switch self {
+        case .indicator: return "👁️"
+        case .action: return "✋"
+        case .consequence: return "✨"
+        }
+    }
+    
+    var color: Color {
+        switch self {
+        case .indicator: return AppTheme.Colors.accentTerracotta
+        case .action: return AppTheme.Colors.primaryGreen
+        case .consequence: return AppTheme.Colors.secondaryGreen
+        }
+    }
+}
+
+// MARK: - Knowledge Node Model
+@Model
+final class KnowledgeNode: Identifiable {
+    var id: UUID
+    var nodeType: String // KnowledgeNodeType rawValue
+    var title: String
+    var nodeDescription: String // Переименовано из description, чтобы избежать конфликта с @Model
+    var observation: String? // "что наблюдать"
+    var whyImportant: String? // "почему это важно"
+    var isUnlocked: Bool
+    var unlockedAt: Date?
+    var relatedActionType: String? // PlantAction rawValue (опциональная связь)
+    
+    // Связи с другими узлами (храним как UUID строки для SwiftData)
+    var relatedNodeIds: [UUID]
+    
+    init(
+        id: UUID = UUID(),
+        nodeType: KnowledgeNodeType,
+        title: String,
+        nodeDescription: String,
+        observation: String? = nil,
+        whyImportant: String? = nil,
+        isUnlocked: Bool = false,
+        unlockedAt: Date? = nil,
+        relatedActionType: PlantAction? = nil,
+        relatedNodeIds: [UUID] = []
+    ) {
+        self.id = id
+        self.nodeType = nodeType.rawValue
+        self.title = title
+        self.nodeDescription = nodeDescription
+        self.observation = observation
+        self.whyImportant = whyImportant
+        self.isUnlocked = isUnlocked
+        self.unlockedAt = unlockedAt
+        self.relatedActionType = relatedActionType?.rawValue
+        self.relatedNodeIds = relatedNodeIds
+    }
+    
+    var type: KnowledgeNodeType {
+        get {
+            KnowledgeNodeType(rawValue: nodeType) ?? .indicator
+        }
+        set {
+            nodeType = newValue.rawValue
+        }
+    }
+    
+    var relatedAction: PlantAction? {
+        get {
+            guard let rawValue = relatedActionType else { return nil }
+            return PlantAction(rawValue: rawValue)
+        }
+        set {
+            relatedActionType = newValue?.rawValue
+        }
+    }
+}
+
+// MARK: - Quest State
+enum QuestState: String, Codable {
+    case active = "Активен"
+    case completed = "Завершён"
+    case expired = "Просрочен"
+    case upcoming = "Скоро"
+    
+    var color: Color {
+        switch self {
+        case .active: return AppTheme.Colors.primaryGreen
+        case .completed: return AppTheme.Colors.softBrown.opacity(0.5)
+        case .expired: return AppTheme.Colors.atRisk
+        case .upcoming: return AppTheme.Colors.needsAttention
+        }
+    }
+}
+
+// MARK: - Quest Model
+@Model
+final class Quest: Identifiable {
+    var id: UUID
+    var title: String
+    var questDescription: String // Переименовано из description, чтобы избежать конфликта с @Model
+    var questState: String // QuestState rawValue
+    var nodeIds: [UUID] // IDs KnowledgeNode в последовательности
+    var deadline: Date?
+    var completedAt: Date?
+    var createdAt: Date
+    var riskLevel: Double // 0-1, уровень риска квеста
+    
+    init(
+        id: UUID = UUID(),
+        title: String,
+        questDescription: String,
+        questState: QuestState = .upcoming,
+        nodeIds: [UUID] = [],
+        deadline: Date? = nil,
+        completedAt: Date? = nil,
+        createdAt: Date = Date(),
+        riskLevel: Double = 0.0
+    ) {
+        self.id = id
+        self.title = title
+        self.questDescription = questDescription
+        self.questState = questState.rawValue
+        self.nodeIds = nodeIds
+        self.deadline = deadline
+        self.completedAt = completedAt
+        self.createdAt = createdAt
+        self.riskLevel = riskLevel
+    }
+    
+    var state: QuestState {
+        get {
+            QuestState(rawValue: questState) ?? .upcoming
+        }
+        set {
+            questState = newValue.rawValue
+        }
     }
 }

@@ -14,6 +14,6 @@ struct PlantochiApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: [PlantInstance.self, ActionLog.self, HomeEntity.self])
+        .modelContainer(for: [PlantInstance.self, ActionLog.self, HomeEntity.self, KnowledgeNode.self, Quest.self])
     }
 }

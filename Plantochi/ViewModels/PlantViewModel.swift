@@ -48,10 +48,37 @@ class PlantViewModel {
         // Обновить состояние растения в зависимости от действия
         updatePlantState(after: action)
         
+        // Разблокировать связанные узлы знаний
+        unlockRelatedKnowledgeNodes(for: action, modelContext: modelContext)
+        
         // Обновить логи
         actionLogs.insert(log, at: 0)
         
         try? modelContext.save()
+    }
+    
+    private func unlockRelatedKnowledgeNodes(for action: PlantAction, modelContext: ModelContext) {
+        let descriptor = FetchDescriptor<KnowledgeNode>()
+        
+        do {
+            let allNodes = try modelContext.fetch(descriptor)
+            // Найти узлы, связанные с этим действием
+            let relatedNodes = allNodes.filter { node in
+                node.relatedAction == action && !node.isUnlocked
+            }
+            
+            // Разблокировать найденные узлы
+            for node in relatedNodes {
+                node.isUnlocked = true
+                node.unlockedAt = Date()
+            }
+            
+            if !relatedNodes.isEmpty {
+                try? modelContext.save()
+            }
+        } catch {
+            print("Failed to unlock knowledge nodes: \(error)")
+        }
     }
     
     private func updatePlantState(after action: PlantAction) {
