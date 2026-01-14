@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct PlantochiApp: App {
@@ -13,5 +14,6 @@ struct PlantochiApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [PlantInstance.self, ActionLog.self, HomeEntity.self])
     }
 }
