@@ -48,8 +48,8 @@ class KnowledgeViewModel {
         loadKnowledgeNodes(modelContext: modelContext)
         loadQuests(modelContext: modelContext)
         
-        // Если нет данных, создать начальные
-        if knowledgeNodes.isEmpty {
+        // Если нет данных (ни узлов, ни квестов), создать начальные
+        if knowledgeNodes.isEmpty && quests.isEmpty {
             seedInitialData(modelContext: modelContext)
         }
     }
@@ -215,7 +215,7 @@ class KnowledgeViewModel {
         modelContext.insert(yellowLeaves)
         modelContext.insert(cleaningAction)
         
-        // Создаём начальный квест
+        // Создаём начальные квесты
         let firstQuest = Quest(
             title: "Первое знакомство",
             questDescription: "Добавь своё первое растение и узнай основы ухода",
@@ -224,7 +224,27 @@ class KnowledgeViewModel {
             riskLevel: 0.0
         )
         
+        // Второй квест - про очистку листьев
+        let cleaningQuest = Quest(
+            title: "Чистота и здоровье",
+            questDescription: "Научись замечать признаки и правильно ухаживать за листьями",
+            questState: .upcoming,
+            nodeIds: [yellowLeaves.id, cleaningAction.id],
+            riskLevel: 0.0
+        )
+        
+        // Третий квест - про последствия ухода
+        let growthQuest = Quest(
+            title: "Результаты заботы",
+            questDescription: "Узнай, как правильный уход влияет на рост растения",
+            questState: .upcoming,
+            nodeIds: [healthyGrowth.id],
+            riskLevel: 0.0
+        )
+        
         modelContext.insert(firstQuest)
+        modelContext.insert(cleaningQuest)
+        modelContext.insert(growthQuest)
         
         do {
             try modelContext.save()

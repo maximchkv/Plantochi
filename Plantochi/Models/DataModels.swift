@@ -357,3 +357,125 @@ final class Quest: Identifiable {
         }
     }
 }
+
+// MARK: - Streak Type
+enum StreakType: String, Codable, CaseIterable {
+    case login = "Вход"
+    case action = "Действия"
+    case quest = "Квесты"
+    case observation = "Наблюдение"
+    
+    var icon: String {
+        switch self {
+        case .login: return "📅"
+        case .action: return "✋"
+        case .quest: return "⭐"
+        case .observation: return "👁️"
+        }
+    }
+}
+
+// MARK: - Streak Model
+@Model
+final class Streak: Identifiable {
+    var id: UUID
+    var streakType: String // StreakType rawValue
+    var currentLength: Int // Текущая длина стрика
+    var lastActivityDate: Date // Последняя дата активности
+    var missedDates: [Date] // Даты пропусков (стрик не теряется, фиксируются пропуски)
+    var longestStreak: Int // Самая длинная серия
+    var createdAt: Date
+    
+    init(
+        id: UUID = UUID(),
+        streakType: StreakType,
+        currentLength: Int = 0,
+        lastActivityDate: Date = Date(),
+        missedDates: [Date] = [],
+        longestStreak: Int = 0,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.streakType = streakType.rawValue
+        self.currentLength = currentLength
+        self.lastActivityDate = lastActivityDate
+        self.missedDates = missedDates
+        self.longestStreak = longestStreak
+        self.createdAt = createdAt
+    }
+    
+    var type: StreakType {
+        get {
+            StreakType(rawValue: streakType) ?? .login
+        }
+        set {
+            streakType = newValue.rawValue
+        }
+    }
+}
+
+// MARK: - Achievement Type
+enum AchievementType: String, Codable, CaseIterable {
+    case quest = "Квест"
+    case discovery = "Открытие"
+    case behavior = "Поведение"
+    case regularity = "Регулярность"
+    
+    var icon: String {
+        switch self {
+        case .quest: return "⭐"
+        case .discovery: return "🔍"
+        case .behavior: return "💚"
+        case .regularity: return "📅"
+        }
+    }
+}
+
+// MARK: - Achievement Model
+@Model
+final class Achievement: Identifiable {
+    var id: UUID
+    var achievementType: String // AchievementType rawValue
+    var title: String
+    var achievementDescription: String
+    var icon: String
+    var unlockedAt: Date?
+    var progress: Double // 0-1 для прогресс-баров
+    var targetValue: Int? // Целевое значение (например, 10 квестов)
+    var currentValue: Int // Текущее значение
+    
+    init(
+        id: UUID = UUID(),
+        achievementType: AchievementType,
+        title: String,
+        achievementDescription: String,
+        icon: String,
+        unlockedAt: Date? = nil,
+        progress: Double = 0.0,
+        targetValue: Int? = nil,
+        currentValue: Int = 0
+    ) {
+        self.id = id
+        self.achievementType = achievementType.rawValue
+        self.title = title
+        self.achievementDescription = achievementDescription
+        self.icon = icon
+        self.unlockedAt = unlockedAt
+        self.progress = progress
+        self.targetValue = targetValue
+        self.currentValue = currentValue
+    }
+    
+    var type: AchievementType {
+        get {
+            AchievementType(rawValue: achievementType) ?? .quest
+        }
+        set {
+            achievementType = newValue.rawValue
+        }
+    }
+    
+    var isUnlocked: Bool {
+        unlockedAt != nil
+    }
+}
